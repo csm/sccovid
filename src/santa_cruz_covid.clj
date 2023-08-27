@@ -113,5 +113,5 @@
                                         updated)
                                    [(:id rt-info) (:id ww-info) (:id hosp-info)]))
         (print "Successfully posted Santa Cruz County COVID-19 projections at " updated)
-        (spit "state.edn" (assoc model-urls :updated updated))
+        (spit "state.edn" (assoc model-urls :updated (str updated)))
         (cleanup)))))
