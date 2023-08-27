@@ -90,7 +90,7 @@
   [& args]
   (let [creds (edn/read-string (slurp "creds.edn"))
         model-urls (get-latest-models)
-        previous-urls (try (slurp "state.edn")
+        previous-urls (try (edn/read-string (slurp "state.edn"))
                            (catch Exception _ nil))]
     (if (= model-urls (dissoc previous-urls :updated))
       (print "no change in PDF URLs. Not downloading or posting anything.")

@@ -1,0 +1,9 @@
+[Unit]
+Description=Run sccovid bot
+
+[Service]
+ExecStart=/usr/local/bin/clj -M -m santa-cruz-covid
+WorkingDirectory=/home/atuonuc/src/sccovid
+
+[Install]
+WantedBy=multi-user.target
