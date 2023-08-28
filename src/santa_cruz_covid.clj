@@ -78,7 +78,7 @@
 
 (defn download
   [url & {:keys [http-client] :or {http-client masto/http-client}}]
-  (let [path (Files/createTempFile "santa-cruz-corona" ".pdf" (into-array FileAttribute []))
+  (let [path (Files/createTempFile "santa-cruz-corona" ".png" (into-array FileAttribute []))
         request (.. (HttpRequest/newBuilder (URI. url))
                     (GET)
                     (build))
