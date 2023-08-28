@@ -9,7 +9,8 @@
            (java.net.http HttpRequest HttpResponse$BodyHandlers)
            (java.nio.file Files)
            (java.nio.file.attribute FileAttribute)
-           (java.time LocalDateTime)))
+           (java.time LocalDateTime ZonedDateTime)
+           (java.time.format DateTimeFormatter FormatStyle)))
 
 (def corona-url "https://santacruzhealth.org/HSAHome/HSADivisions/PublicHealth/CommunicableDiseaseControl/CoronavirusHome.aspx")
 
@@ -115,12 +116,13 @@
             hosp-info (die-if-anomaly
                         (masto/upload-png-image (:base-url creds) (:access-token creds) hosp-png
                                                 "Santa Cruz County COVID-19 Hospitalization Projections"))
-            updated (LocalDateTime/now)]
+            updated (ZonedDateTime/now)
+            formatter (DateTimeFormatter/ofLocalizedDateTime FormatStyle/LONG)]
         (die-if-anomaly
           (masto/post-media-status (:base-url creds) (:access-token creds)
                                    (str "Santa Cruz County COVID-19 projections as of "
-                                        updated)
+                                        (.format formatter updated))
                                    [(:id rt-info) (:id ww-info) (:id hosp-info)]))
         (print "Successfully posted Santa Cruz County COVID-19 projections at " updated)
-        (spit "state.edn" (assoc model-urls :updated (str updated)))
+        (spit "state.edn" (assoc model-urls :updated (.format formatter updated)))
         (cleanup)))))
