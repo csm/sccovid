@@ -102,8 +102,8 @@
         model-urls (get-latest-models)
         previous-urls (try (edn/read-string (slurp "state.edn"))
                            (catch Exception _ nil))]
-    (if (= model-urls (dissoc previous-urls :updated))
-      (print "no change in PDF URLs. Not downloading or posting anything.")
+    (if false ;(= model-urls (dissoc previous-urls :updated))
+      (print "no change in URLs. Not downloading or posting anything.")
       (let [rt-png (remove-alpha-channel (download (:rt-number model-urls)))
             ww-png (remove-alpha-channel (download (:wastewater model-urls)))
             hosp-png (remove-alpha-channel (download (:hospitalizations model-urls)))
