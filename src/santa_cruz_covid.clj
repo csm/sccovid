@@ -1,14 +1,13 @@
 (ns santa-cruz-covid
   (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]
             [clojure.spec.alpha :as spec]
             [hickory.core :as h]
             [hickory.select :as s]
             [santa-cruz-covid.mastodon :as masto])
   (:import (java.io Closeable)
            (java.net URI URL)
-           (java.net.http HttpRequest HttpResponse HttpResponse$BodyHandlers)
-           (java.nio.file Files OpenOption Path Paths StandardOpenOption)
+           (java.net.http HttpRequest HttpResponse$BodyHandlers)
+           (java.nio.file Files)
            (java.nio.file.attribute FileAttribute)
            (java.time LocalDateTime)))
 
@@ -55,6 +54,18 @@
   (apply prn args)
   (System/exit 1))
 
+(defn remove-alpha-channel
+  [path]
+  (let [proc (.. (ProcessBuilder. ["/usr/bin/mogrify"
+                                   "-background" "white"
+                                   "-flatten"
+                                   (str path)])
+                 (start))
+        exit-code (.waitFor proc)]
+    (when (not (zero? exit-code))
+      (die "Removing alpha channel from " (str path) " failed with exit code " exit-code))
+    path))
+
 (defn get-latest-models
   [& {:keys [http-client] :or {http-client masto/http-client}}]
   (let [request (.. (HttpRequest/newBuilder (URI. corona-url))
@@ -64,8 +75,6 @@
     (if (not= 200 (.statusCode response))
       (die "Failed to fetch COVID-19 info page, status: " (.statusCode response) " body: " (.body response))
       (read-urls (.body response)))))
-
-(def tmpdir (Path/of (System/getProperty "java.io.tmpdir") (into-array String [])))
 
 (defn download
   [url & {:keys [http-client] :or {http-client masto/http-client}}]
@@ -94,9 +103,9 @@
                            (catch Exception _ nil))]
     (if (= model-urls (dissoc previous-urls :updated))
       (print "no change in PDF URLs. Not downloading or posting anything.")
-      (let [rt-png (download (:rt-number model-urls))
-            ww-png (download (:wastewater model-urls))
-            hosp-png (download (:hospitalizations model-urls))
+      (let [rt-png (remove-alpha-channel (download (:rt-number model-urls)))
+            ww-png (remove-alpha-channel (download (:wastewater model-urls)))
+            hosp-png (remove-alpha-channel (download (:hospitalizations model-urls)))
             rt-info (die-if-anomaly
                       (masto/upload-png-image (:base-url creds) (:access-token creds) rt-png
                                               "Santa Cruz County COVID-19 Effective Reproductive Number Rt"))
