@@ -11,4 +11,8 @@ a file `creds.edn` that contains the following:
 * `:base-url` -- the base URL of your Mastodon instance. Mine is `https://botsin.space`!
 * `:access-token` -- your access token for posting to your Mastodon account.
 
-You can run it with `clj -M -m santa-cruz-covid`.
+You can run me with `clj -M -m santa-cruz-covid`.
+
+I need ImageMagick installed, so
+I can remove the alpha channel
+from images I download.
